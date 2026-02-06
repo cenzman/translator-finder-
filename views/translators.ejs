@@ -1,0 +1,22 @@
+<%- include('partials/header') %>
+
+<h1>Translators</h1>
+<p>Professional translators specializing in Vietnamese and Czech</p>
+
+<% if (translators.length === 0) { %>
+  <p>No translators have registered yet.</p>
+<% } else { %>
+  <div class="translator-list">
+    <% translators.forEach(function(t) { %>
+      <div class="translator-card">
+        <h2><a href="/translators/<%= t.id %>"><%= t.name %></a></h2>
+        <p><strong>Languages:</strong> <%= t.languages %></p>
+        <p><strong>Experience:</strong> <%= t.experience_years %> years</p>
+        <p><strong>Rate:</strong> $<%= t.hourly_rate %>/hr</p>
+        <p><strong>Rating:</strong> <%= t.avg_rating %> (<%= t.review_count %> reviews)</p>
+      </div>
+    <% }); %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

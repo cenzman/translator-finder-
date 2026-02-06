@@ -1,0 +1,60 @@
+<%- include('partials/header') %>
+
+<h1><%= translator.name %></h1>
+
+<div class="profile-detail">
+  <p><strong>Email:</strong> <%= translator.email %></p>
+  <p><strong>Languages:</strong> <%= translator.languages %></p>
+  <p><strong>Experience:</strong> <%= translator.experience_years %> years</p>
+  <p><strong>Rate:</strong> $<%= translator.hourly_rate %>/hr</p>
+  <p><strong>Rating:</strong> <%= avg_rating %> (<%= review_count %> reviews)</p>
+  <% if (translator.bio) { %>
+    <p><strong>Bio:</strong> <%= translator.bio %></p>
+  <% } %>
+</div>
+
+<h2>Reviews</h2>
+
+<% if (typeof user !== 'undefined' && user.userRole === 'client') { %>
+  <div class="review-form">
+    <h3>Leave a Review</h3>
+    <form method="POST" action="/reviews">
+      <input type="hidden" name="translator_id" value="<%= translator.id %>">
+      <div class="form-group">
+        <label for="rating">Rating (1-5)</label>
+        <select id="rating" name="rating" required>
+          <option value="5">5 - Excellent</option>
+          <option value="4">4 - Good</option>
+          <option value="3">3 - Average</option>
+          <option value="2">2 - Below Average</option>
+          <option value="1">1 - Poor</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="comment">Comment</label>
+        <textarea id="comment" name="comment" rows="4"></textarea>
+      </div>
+      <button type="submit" class="btn">Submit Review</button>
+    </form>
+  </div>
+<% } else if (typeof user === 'undefined' || !user.userId) { %>
+  <p><a href="/auth/login">Login as a client</a> to leave a review.</p>
+<% } %>
+
+<% if (reviews.length === 0) { %>
+  <p>No reviews yet.</p>
+<% } else { %>
+  <div class="reviews-list">
+    <% reviews.forEach(function(r) { %>
+      <div class="review-card">
+        <p><strong><%= r.client_name %></strong> - Rating: <%= r.rating %>/5</p>
+        <p><%= r.comment %></p>
+        <p class="review-date"><%= r.created_at %></p>
+      </div>
+    <% }); %>
+  </div>
+<% } %>
+
+<a href="/translators">&larr; Back to Translators</a>
+
+<%- include('partials/footer') %>
