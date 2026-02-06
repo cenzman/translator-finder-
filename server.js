@@ -1,16 +1,14 @@
 const { createApp } = require("./src/app");
 
+const app = createApp();
 const PORT = process.env.PORT || 3000;
 
-if (process.env.NODE_ENV === "production") {
-  if (!process.env.SESSION_SECRET || !process.env.CSRF_SECRET) {
-    console.error("ERROR: SESSION_SECRET and CSRF_SECRET environment variables must be set in production.");
-    process.exit(1);
-  }
+// Only listen when running locally (not on Vercel)
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => {
+    console.log(`Translator Finder running at http://localhost:${PORT}`);
+  });
 }
 
-const app = createApp();
-
-app.listen(PORT, () => {
-  console.log(`Translator Finder running at http://localhost:${PORT}`);
-});
+// Export for Vercel serverless
+module.exports = app;
