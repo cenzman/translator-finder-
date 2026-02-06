@@ -1,0 +1,53 @@
+<%- include('partials/header') %>
+
+<div class="form-card" style="max-width:560px;">
+  <h1>Edit Profile</h1>
+  <p class="form-subtitle">Update your translator information</p>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+    <p class="error"><%= error %></p>
+  <% } %>
+  <% if (typeof success !== 'undefined' && success) { %>
+    <p class="success"><%= success %></p>
+  <% } %>
+
+  <form method="POST" action="/auth/profile">
+    <input type="hidden" name="_csrf" value="<%= generateCsrfToken() %>">
+
+    <div class="form-group">
+      <label for="name">Full Name</label>
+      <input type="text" id="name" name="name" value="<%= profile.name %>" required>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" value="<%= profile.email %>" required>
+    </div>
+
+    <div class="form-group">
+      <label for="languages">Languages</label>
+      <input type="text" id="languages" name="languages" value="<%= profile.languages %>" required>
+    </div>
+
+    <div class="form-group">
+      <label for="bio">Bio</label>
+      <textarea id="bio" name="bio" rows="4" placeholder="Tell clients about your experience…"><%= profile.bio || '' %></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="experience_years">Years of Experience</label>
+      <input type="number" id="experience_years" name="experience_years" min="0" value="<%= profile.experience_years %>">
+    </div>
+
+    <div class="form-group">
+      <label for="hourly_rate">Hourly Rate ($)</label>
+      <input type="number" id="hourly_rate" name="hourly_rate" min="0" step="0.01" value="<%= profile.hourly_rate %>">
+    </div>
+
+    <button type="submit" class="btn" style="width:100%;">Save Changes</button>
+  </form>
+
+  <p class="form-footer" style="margin-top:20px;"><a href="/">Back to Home</a></p>
+</div>
+
+<%- include('partials/footer') %>

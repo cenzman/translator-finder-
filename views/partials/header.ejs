@@ -7,15 +7,22 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <nav>
-    <a href="/">Home</a>
-    <a href="/translators">Translators</a>
-    <% if (typeof user !== 'undefined' && user.userId) { %>
-      <span>Welcome, <%= user.userName %> (<%= user.userRole %>)</span>
-      <a href="/auth/logout">Logout</a>
-    <% } else { %>
-      <a href="/auth/login">Login</a>
-      <a href="/auth/register">Register</a>
-    <% } %>
-  </nav>
+  <header class="navbar">
+    <div class="navbar-inner">
+      <a href="/" class="navbar-brand">&#127760; Translator Finder</a>
+      <div class="navbar-links">
+        <a href="/translators">Browse</a>
+        <% if (typeof user !== 'undefined' && user.userId) { %>
+          <% if (user.userRole === 'translator') { %>
+            <a href="/auth/profile">My Profile</a>
+          <% } %>
+          <span class="nav-user">&#128100; <%= user.userName %></span>
+          <a href="/auth/logout">Logout</a>
+        <% } else { %>
+          <a href="/auth/login">Sign In</a>
+          <a href="/auth/register" class="btn-nav">Get Started</a>
+        <% } %>
+      </div>
+    </div>
+  </header>
   <main>

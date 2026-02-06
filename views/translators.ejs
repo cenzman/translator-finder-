@@ -1,19 +1,36 @@
 <%- include('partials/header') %>
 
-<h1>Translators</h1>
-<p>Professional translators specializing in Vietnamese and Czech</p>
+<div class="catalog-header">
+  <div>
+    <h1>Translator Catalog</h1>
+    <p class="page-subtitle">Professional translators specializing in Vietnamese and Czech</p>
+  </div>
+</div>
 
 <% if (translators.length === 0) { %>
-  <p>No translators have registered yet.</p>
+  <div class="empty-state">
+    <p>No translators have registered yet.</p>
+    <a href="/auth/register" class="btn" style="margin-top:16px;">Be the first to join</a>
+  </div>
 <% } else { %>
-  <div class="translator-list">
+  <div class="translator-grid">
     <% translators.forEach(function(t) { %>
       <div class="translator-card">
-        <h2><a href="/translators/<%= t.id %>"><%= t.name %></a></h2>
-        <p><strong>Languages:</strong> <%= t.languages %></p>
-        <p><strong>Experience:</strong> <%= t.experience_years %> years</p>
-        <p><strong>Rate:</strong> $<%= t.hourly_rate %>/hr</p>
-        <p><strong>Rating:</strong> <%= t.avg_rating %> (<%= t.review_count %> reviews)</p>
+        <div class="card-header">
+          <div class="avatar"><%= t.name.charAt(0).toUpperCase() %></div>
+          <div>
+            <div class="card-name"><a href="/translators/<%= t.id %>"><%= t.name %></a></div>
+            <span class="badge badge-lang"><%= t.languages %></span>
+          </div>
+        </div>
+        <div class="card-meta">
+          <span>&#128188; <%= t.experience_years %> years experience</span>
+          <span>&#128176; $<%= t.hourly_rate %>/hr</span>
+        </div>
+        <div class="card-footer">
+          <div class="rating">&#11088; <%= t.avg_rating %> <span style="color:var(--text-muted);font-weight:400;">(<%= t.review_count %>)</span></div>
+          <a href="/translators/<%= t.id %>" class="btn" style="padding:7px 16px;font-size:13px;">View Profile</a>
+        </div>
       </div>
     <% }); %>
   </div>

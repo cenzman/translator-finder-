@@ -1,15 +1,39 @@
 <%- include('partials/header') %>
 
-<h1><%= translator.name %></h1>
+<a href="/translators" class="back-link">&larr; Back to Catalog</a>
+
+<div class="profile-header" style="margin-top:16px;">
+  <div class="profile-avatar"><%= translator.name.charAt(0).toUpperCase() %></div>
+  <div class="profile-info">
+    <h1><%= translator.name %></h1>
+    <p class="email"><%= translator.email %></p>
+  </div>
+</div>
 
 <div class="profile-detail">
-  <p><strong>Email:</strong> <%= translator.email %></p>
-  <p><strong>Languages:</strong> <%= translator.languages %></p>
-  <p><strong>Experience:</strong> <%= translator.experience_years %> years</p>
-  <p><strong>Rate:</strong> $<%= translator.hourly_rate %>/hr</p>
-  <p><strong>Rating:</strong> <%= avg_rating %> (<%= review_count %> reviews)</p>
+  <div class="profile-stats">
+    <div class="stat-item">
+      <div class="stat-value"><%= translator.languages %></div>
+      <div class="stat-label">Languages</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value"><%= translator.experience_years %></div>
+      <div class="stat-label">Years Experience</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">$<%= translator.hourly_rate %></div>
+      <div class="stat-label">Hourly Rate</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value rating">&#11088; <%= avg_rating %></div>
+      <div class="stat-label"><%= review_count %> Reviews</div>
+    </div>
+  </div>
   <% if (translator.bio) { %>
-    <p><strong>Bio:</strong> <%= translator.bio %></p>
+    <div class="profile-bio">
+      <strong>About</strong>
+      <p style="margin-top:8px;"><%= translator.bio %></p>
+    </div>
   <% } %>
 </div>
 
@@ -22,40 +46,43 @@
       <input type="hidden" name="_csrf" value="<%= generateCsrfToken() %>">
       <input type="hidden" name="translator_id" value="<%= translator.id %>">
       <div class="form-group">
-        <label for="rating">Rating (1-5)</label>
+        <label for="rating">Rating</label>
         <select id="rating" name="rating" required>
-          <option value="5">5 - Excellent</option>
-          <option value="4">4 - Good</option>
-          <option value="3">3 - Average</option>
-          <option value="2">2 - Below Average</option>
-          <option value="1">1 - Poor</option>
+          <option value="5">&#11088; 5 — Excellent</option>
+          <option value="4">&#11088; 4 — Good</option>
+          <option value="3">&#11088; 3 — Average</option>
+          <option value="2">&#11088; 2 — Below Average</option>
+          <option value="1">&#11088; 1 — Poor</option>
         </select>
       </div>
       <div class="form-group">
         <label for="comment">Comment</label>
-        <textarea id="comment" name="comment" rows="4"></textarea>
+        <textarea id="comment" name="comment" rows="4" placeholder="Share your experience…"></textarea>
       </div>
       <button type="submit" class="btn">Submit Review</button>
     </form>
   </div>
 <% } else if (typeof user === 'undefined' || !user.userId) { %>
-  <p><a href="/auth/login">Login as a client</a> to leave a review.</p>
+  <p style="margin-bottom:16px;"><a href="/auth/login">Sign in as a client</a> to leave a review.</p>
 <% } %>
 
 <% if (reviews.length === 0) { %>
-  <p>No reviews yet.</p>
+  <div class="empty-state">
+    <p>No reviews yet.</p>
+  </div>
 <% } else { %>
   <div class="reviews-list">
     <% reviews.forEach(function(r) { %>
       <div class="review-card">
-        <p><strong><%= r.client_name %></strong> - Rating: <%= r.rating %>/5</p>
-        <p><%= r.comment %></p>
+        <div class="review-header">
+          <span class="review-author"><%= r.client_name %></span>
+          <span class="review-rating">&#11088; <%= r.rating %>/5</span>
+        </div>
+        <p class="review-comment"><%= r.comment %></p>
         <p class="review-date"><%= r.created_at %></p>
       </div>
     <% }); %>
   </div>
 <% } %>
-
-<a href="/translators">&larr; Back to Translators</a>
 
 <%- include('partials/footer') %>
