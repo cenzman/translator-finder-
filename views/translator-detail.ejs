@@ -19,6 +19,7 @@
   <div class="review-form">
     <h3>Leave a Review</h3>
     <form method="POST" action="/reviews">
+      <input type="hidden" name="_csrf" value="<%= generateCsrfToken() %>">
       <input type="hidden" name="translator_id" value="<%= translator.id %>">
       <div class="form-group">
         <label for="rating">Rating (1-5)</label>
