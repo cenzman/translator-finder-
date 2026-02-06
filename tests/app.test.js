@@ -42,13 +42,13 @@ describe("Auth Routes", () => {
   test("GET /auth/register returns 200", async () => {
     const res = await request(app).get("/auth/register");
     expect(res.status).toBe(200);
-    expect(res.text).toContain("Register");
+    expect(res.text).toContain("Create Account");
   });
 
   test("GET /auth/login returns 200", async () => {
     const res = await request(app).get("/auth/login");
     expect(res.status).toBe(200);
-    expect(res.text).toContain("Login");
+    expect(res.text).toContain("Sign In");
   });
 
   test("POST /auth/register creates a client account", async () => {
@@ -256,5 +256,120 @@ describe("Review Routes", () => {
     const detailRes = await request(app).get("/translators/1");
     expect(detailRes.text).toContain("Excellent work!");
     expect(detailRes.text).toContain("5.0");
+  });
+});
+
+describe("Profile Edit Routes", () => {
+  test("GET /auth/profile redirects if not logged in", async () => {
+    const res = await request(app).get("/auth/profile");
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe("/auth/login");
+  });
+
+  test("GET /auth/profile returns 403 for clients", async () => {
+    const agent = request.agent(app);
+    const { token } = await getCsrf(agent, "/auth/register");
+    await agent
+      .post("/auth/register")
+      .type("form")
+      .send({ _csrf: token, email: "client@test.com", password: "pass123", name: "Client", role: "client" });
+
+    const res = await agent.get("/auth/profile");
+    expect(res.status).toBe(403);
+  });
+
+  test("GET /auth/profile returns 200 for translators", async () => {
+    const agent = request.agent(app);
+    const { token } = await getCsrf(agent, "/auth/register");
+    await agent
+      .post("/auth/register")
+      .type("form")
+      .send({
+        _csrf: token,
+        email: "trans@test.com",
+        password: "pass123",
+        name: "Trans User",
+        role: "translator",
+        languages: "Vietnamese, Czech",
+      });
+
+    const res = await agent.get("/auth/profile");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("Edit Profile");
+    expect(res.text).toContain("Trans User");
+  });
+
+  test("POST /auth/profile updates translator info", async () => {
+    const agent = request.agent(app);
+    const { token: regToken } = await getCsrf(agent, "/auth/register");
+    await agent
+      .post("/auth/register")
+      .type("form")
+      .send({
+        _csrf: regToken,
+        email: "editable@test.com",
+        password: "pass123",
+        name: "Old Name",
+        role: "translator",
+        languages: "Vietnamese, Czech",
+        bio: "Old bio",
+        experience_years: "3",
+        hourly_rate: "20",
+      });
+
+    const { token: profileToken } = await getCsrf(agent, "/auth/profile");
+    const res = await agent
+      .post("/auth/profile")
+      .type("form")
+      .send({
+        _csrf: profileToken,
+        name: "New Name",
+        email: "editable@test.com",
+        languages: "Vietnamese, Czech, English",
+        bio: "Updated bio",
+        experience_years: "5",
+        hourly_rate: "30",
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("Profile updated successfully");
+    expect(res.text).toContain("New Name");
+    expect(res.text).toContain("Updated bio");
+
+    // Verify in database
+    const profile = app.locals.db.prepare("SELECT * FROM translator_profiles").get();
+    expect(profile.languages).toBe("Vietnamese, Czech, English");
+    expect(profile.experience_years).toBe(5);
+    expect(profile.hourly_rate).toBe(30);
+  });
+
+  test("POST /auth/profile rejects missing required fields", async () => {
+    const agent = request.agent(app);
+    const { token: regToken } = await getCsrf(agent, "/auth/register");
+    await agent
+      .post("/auth/register")
+      .type("form")
+      .send({
+        _csrf: regToken,
+        email: "validate@test.com",
+        password: "pass123",
+        name: "Validator",
+        role: "translator",
+        languages: "Vietnamese",
+      });
+
+    const { token: profileToken } = await getCsrf(agent, "/auth/profile");
+    const res = await agent
+      .post("/auth/profile")
+      .type("form")
+      .send({
+        _csrf: profileToken,
+        name: "",
+        email: "validate@test.com",
+        languages: "Vietnamese",
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.text).toContain("required");
   });
 });
