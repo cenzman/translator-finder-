@@ -87,56 +87,105 @@ router.get("/logout", (req, res) => {
 });
 
 router.get("/profile", requireLogin, (req, res) => {
-  if (req.session.userRole !== "translator") {
-    return res.status(403).render("error", { message: "Only translators can edit their profile", user: req.session });
+  if (req.session.userRole === "translator") {
+    const profile = req.app.locals.db.prepare(`
+      SELECT u.name, u.email, tp.languages, tp.bio, tp.experience_years, tp.hourly_rate
+      FROM users u
+      JOIN translator_profiles tp ON tp.user_id = u.id
+      WHERE u.id = ?
+    `).get(req.session.userId);
+
+    if (!profile) {
+      return res.status(404).render("error", { message: res.locals.t.profile.profile_not_found, user: req.session });
+    }
+
+    return res.render("profile", { profile, error: null, success: null, user: req.session });
   }
 
-  const profile = req.app.locals.db.prepare(`
-    SELECT u.name, u.email, tp.languages, tp.bio, tp.experience_years, tp.hourly_rate
-    FROM users u
-    JOIN translator_profiles tp ON tp.user_id = u.id
-    WHERE u.id = ?
-  `).get(req.session.userId);
-
-  if (!profile) {
-    return res.status(404).render("error", { message: "Profile not found", user: req.session });
+  // Client profile
+  const user = req.app.locals.db.prepare("SELECT name, email FROM users WHERE id = ?").get(req.session.userId);
+  if (!user) {
+    return res.status(404).render("error", { message: res.locals.t.profile.profile_not_found, user: req.session });
   }
 
-  res.render("profile", { profile, error: null, success: null, user: req.session });
+  let clientProfile = req.app.locals.db.prepare("SELECT * FROM client_profiles WHERE user_id = ?").get(req.session.userId);
+  if (!clientProfile) {
+    req.app.locals.db.prepare("INSERT INTO client_profiles (user_id) VALUES (?)").run(req.session.userId);
+    clientProfile = req.app.locals.db.prepare("SELECT * FROM client_profiles WHERE user_id = ?").get(req.session.userId);
+  }
+
+  const profile = {
+    name: user.name,
+    email: user.email,
+    phone: clientProfile.phone || "",
+    company: clientProfile.company || "",
+    preferred_languages: clientProfile.preferred_languages || "",
+    notes: clientProfile.notes || "",
+  };
+
+  res.render("client-profile", { profile, error: null, success: null, user: req.session });
 });
 
 router.post("/profile", requireLogin, (req, res) => {
-  if (req.session.userRole !== "translator") {
-    return res.status(403).render("error", { message: "Only translators can edit their profile", user: req.session });
+  if (req.session.userRole === "translator") {
+    const { name, email, languages, bio, experience_years, hourly_rate } = req.body;
+
+    if (!name || !email || !languages) {
+      const profile = { name: name || "", email: email || "", languages: languages || "", bio: bio || "", experience_years: experience_years || 0, hourly_rate: hourly_rate || 0 };
+      return res.status(400).render("profile", { profile, error: res.locals.t.profile.required_fields, success: null, user: req.session });
+    }
+
+    const experienceYears = parseInt(experience_years, 10) || 0;
+    const rate = parseFloat(hourly_rate) || 0;
+
+    const existing = req.app.locals.db.prepare("SELECT id FROM users WHERE email = ? AND id != ?").get(email, req.session.userId);
+    if (existing) {
+      const profile = { name, email, languages, bio: bio || "", experience_years: experienceYears, hourly_rate: rate };
+      return res.status(400).render("profile", { profile, error: res.locals.t.profile.email_in_use, success: null, user: req.session });
+    }
+
+    req.app.locals.db.prepare("UPDATE users SET name = ?, email = ? WHERE id = ?").run(name, email, req.session.userId);
+    req.app.locals.db.prepare("UPDATE translator_profiles SET languages = ?, bio = ?, experience_years = ?, hourly_rate = ? WHERE user_id = ?")
+      .run(languages, bio || "", experienceYears, rate, req.session.userId);
+
+    req.session.userName = name;
+    req.session.userEmail = email;
+
+    const profile = { name, email, languages, bio: bio || "", experience_years: experienceYears, hourly_rate: rate };
+    return res.render("profile", { profile, error: null, success: res.locals.t.profile.profile_updated, user: req.session });
   }
 
-  const { name, email, languages, bio, experience_years, hourly_rate } = req.body;
+  // Client profile update
+  const { name, email, phone, company, preferred_languages, notes } = req.body;
 
-  if (!name || !email || !languages) {
-    const profile = { name: name || "", email: email || "", languages: languages || "", bio: bio || "", experience_years: experience_years || 0, hourly_rate: hourly_rate || 0 };
-    return res.status(400).render("profile", { profile, error: "Name, email, and languages are required", success: null, user: req.session });
+  if (!name || !email) {
+    const profile = { name: name || "", email: email || "", phone: phone || "", company: company || "", preferred_languages: preferred_languages || "", notes: notes || "" };
+    return res.status(400).render("client-profile", { profile, error: res.locals.t.profile.required_fields_client, success: null, user: req.session });
   }
 
-  const experienceYears = parseInt(experience_years, 10) || 0;
-  const rate = parseFloat(hourly_rate) || 0;
-
-  // Check if the new email is already taken by another user
   const existing = req.app.locals.db.prepare("SELECT id FROM users WHERE email = ? AND id != ?").get(email, req.session.userId);
   if (existing) {
-    const profile = { name, email, languages, bio: bio || "", experience_years: experienceYears, hourly_rate: rate };
-    return res.status(400).render("profile", { profile, error: "Email already in use by another account", success: null, user: req.session });
+    const profile = { name, email, phone: phone || "", company: company || "", preferred_languages: preferred_languages || "", notes: notes || "" };
+    return res.status(400).render("client-profile", { profile, error: res.locals.t.profile.email_in_use, success: null, user: req.session });
   }
 
   req.app.locals.db.prepare("UPDATE users SET name = ?, email = ? WHERE id = ?").run(name, email, req.session.userId);
-  req.app.locals.db.prepare("UPDATE translator_profiles SET languages = ?, bio = ?, experience_years = ?, hourly_rate = ? WHERE user_id = ?")
-    .run(languages, bio || "", experienceYears, rate, req.session.userId);
 
-  // Update session
+  // Upsert client profile
+  const existingProfile = req.app.locals.db.prepare("SELECT id FROM client_profiles WHERE user_id = ?").get(req.session.userId);
+  if (existingProfile) {
+    req.app.locals.db.prepare("UPDATE client_profiles SET phone = ?, company = ?, preferred_languages = ?, notes = ? WHERE user_id = ?")
+      .run(phone || "", company || "", preferred_languages || "", notes || "", req.session.userId);
+  } else {
+    req.app.locals.db.prepare("INSERT INTO client_profiles (user_id, phone, company, preferred_languages, notes) VALUES (?, ?, ?, ?, ?)")
+      .run(req.session.userId, phone || "", company || "", preferred_languages || "", notes || "");
+  }
+
   req.session.userName = name;
   req.session.userEmail = email;
 
-  const profile = { name, email, languages, bio: bio || "", experience_years: experienceYears, hourly_rate: rate };
-  res.render("profile", { profile, error: null, success: "Profile updated successfully", user: req.session });
+  const profile = { name, email, phone: phone || "", company: company || "", preferred_languages: preferred_languages || "", notes: notes || "" };
+  res.render("client-profile", { profile, error: null, success: res.locals.t.profile.profile_updated, user: req.session });
 });
 
 module.exports = router;

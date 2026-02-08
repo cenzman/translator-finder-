@@ -1,27 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= lang %>">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Translator Finder</title>
+  <title><%= t.site_title %></title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <header class="navbar">
     <div class="navbar-inner">
-      <a href="/" class="navbar-brand">&#127760; Translator Finder</a>
+      <a href="/" class="navbar-brand">&#127760; <%= t.site_title %></a>
       <div class="navbar-links">
-        <a href="/translators">Browse</a>
+        <a href="/translators"><%= t.nav.browse %></a>
         <% if (typeof user !== 'undefined' && user.userId) { %>
-          <% if (user.userRole === 'translator') { %>
-            <a href="/auth/profile">My Profile</a>
-          <% } %>
+          <a href="/auth/profile"><%= t.nav.my_profile %></a>
           <span class="nav-user">&#128100; <%= user.userName %></span>
-          <a href="/auth/logout">Logout</a>
+          <a href="/auth/logout"><%= t.nav.logout %></a>
         <% } else { %>
-          <a href="/auth/login">Sign In</a>
-          <a href="/auth/register" class="btn-nav">Get Started</a>
+          <a href="/auth/login"><%= t.nav.sign_in %></a>
+          <a href="/auth/register" class="btn-nav"><%= t.nav.get_started %></a>
         <% } %>
+        <span class="lang-switcher">
+          <% supportedLangs.forEach(function(l) { %>
+            <a href="?lang=<%= l %>" class="lang-link<%= l === lang ? ' active' : '' %>"><%= l.toUpperCase() %></a>
+          <% }); %>
+        </span>
       </div>
     </div>
   </header>

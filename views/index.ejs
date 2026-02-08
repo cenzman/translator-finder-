@@ -1,26 +1,26 @@
 <%- include('partials/header') %>
 
 <section class="hero">
-  <h1>Find Your Perfect Translator</h1>
-  <p>Discover professional translators specializing in Vietnamese and Czech languages — rated and reviewed by real clients.</p>
+  <h1><%= t.home.hero_title %></h1>
+  <p><%= t.home.hero_subtitle %></p>
   <div class="hero-actions">
-    <a href="/translators" class="btn">Browse Translators</a>
-    <a href="/auth/register" class="btn btn-outline">Join as Translator</a>
+    <a href="/translators" class="btn"><%= t.home.browse_translators %></a>
+    <a href="/auth/register" class="btn btn-outline"><%= t.home.join_as_translator %></a>
   </div>
 </section>
 
 <div class="features">
   <div class="feature">
     <div class="feature-icon clients">&#128269;</div>
-    <h2>For Clients</h2>
-    <p>Browse translator profiles, compare rates, read reviews, and find the right match for your project.</p>
-    <a href="/translators" class="btn btn-secondary">Browse Catalog</a>
+    <h2><%= t.home.for_clients %></h2>
+    <p><%= t.home.for_clients_desc %></p>
+    <a href="/translators" class="btn btn-secondary"><%= t.home.browse_catalog %></a>
   </div>
   <div class="feature">
     <div class="feature-icon translators">&#9997;&#65039;</div>
-    <h2>For Translators</h2>
-    <p>Create your profile, showcase your skills, set your rates, and start getting hired by clients worldwide.</p>
-    <a href="/auth/register" class="btn btn-secondary">Create Profile</a>
+    <h2><%= t.home.for_translators %></h2>
+    <p><%= t.home.for_translators_desc %></p>
+    <a href="/auth/register" class="btn btn-secondary"><%= t.home.create_profile %></a>
   </div>
 </div>
 

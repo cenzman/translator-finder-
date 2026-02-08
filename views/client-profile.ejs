@@ -2,7 +2,7 @@
 
 <div class="form-card" style="max-width:560px;">
   <h1><%= t.profile.edit_title %></h1>
-  <p class="form-subtitle"><%= t.profile.translator_subtitle %></p>
+  <p class="form-subtitle"><%= t.profile.client_subtitle %></p>
 
   <% if (typeof error !== 'undefined' && error) { %>
     <p class="error"><%= error %></p>
@@ -25,23 +25,23 @@
     </div>
 
     <div class="form-group">
-      <label for="languages"><%= t.profile.languages %></label>
-      <input type="text" id="languages" name="languages" value="<%= profile.languages %>" required>
+      <label for="phone"><%= t.profile.phone %></label>
+      <input type="text" id="phone" name="phone" value="<%= profile.phone %>" placeholder="<%= t.profile.phone_placeholder %>">
     </div>
 
     <div class="form-group">
-      <label for="bio"><%= t.profile.bio %></label>
-      <textarea id="bio" name="bio" rows="4" placeholder="<%= t.profile.bio_placeholder %>"><%= profile.bio || '' %></textarea>
+      <label for="company"><%= t.profile.company %></label>
+      <input type="text" id="company" name="company" value="<%= profile.company %>" placeholder="<%= t.profile.company_placeholder %>">
     </div>
 
     <div class="form-group">
-      <label for="experience_years"><%= t.profile.years_experience %></label>
-      <input type="number" id="experience_years" name="experience_years" min="0" value="<%= profile.experience_years %>">
+      <label for="preferred_languages"><%= t.profile.preferred_languages %></label>
+      <input type="text" id="preferred_languages" name="preferred_languages" value="<%= profile.preferred_languages %>" placeholder="<%= t.profile.preferred_languages_placeholder %>">
     </div>
 
     <div class="form-group">
-      <label for="hourly_rate"><%= t.profile.hourly_rate %></label>
-      <input type="number" id="hourly_rate" name="hourly_rate" min="0" step="0.01" value="<%= profile.hourly_rate %>">
+      <label for="notes"><%= t.profile.notes %></label>
+      <textarea id="notes" name="notes" rows="4" placeholder="<%= t.profile.notes_placeholder %>"><%= profile.notes || '' %></textarea>
     </div>
 
     <button type="submit" class="btn" style="width:100%;"><%= t.profile.save_changes %></button>

@@ -6,6 +6,7 @@ const rateLimit = require("express-rate-limit");
 const { doubleCsrf } = require("csrf-csrf");
 const path = require("path");
 const { createDb } = require("./db");
+const { i18nMiddleware } = require("./middleware/i18n");
 
 function createApp(dbPath) {
   const app = express();
@@ -27,6 +28,8 @@ function createApp(dbPath) {
       cookie: { secure: process.env.NODE_ENV === "production" },
     })
   );
+
+  app.use(i18nMiddleware);
 
   const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,

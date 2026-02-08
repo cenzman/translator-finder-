@@ -38,6 +38,17 @@ function createDb(dbPath) {
       FOREIGN KEY (translator_id) REFERENCES translator_profiles(id),
       FOREIGN KEY (client_id) REFERENCES users(id)
     );
+
+    CREATE TABLE IF NOT EXISTS client_profiles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER UNIQUE NOT NULL,
+      phone TEXT DEFAULT '',
+      company TEXT DEFAULT '',
+      preferred_languages TEXT DEFAULT '',
+      notes TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
   `);
 
   return db;

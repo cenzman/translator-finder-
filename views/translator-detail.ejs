@@ -1,6 +1,6 @@
 <%- include('partials/header') %>
 
-<a href="/translators" class="back-link">&larr; Back to Catalog</a>
+<a href="/translators" class="back-link">&larr; <%= t.translator_detail.back_to_catalog %></a>
 
 <div class="profile-header" style="margin-top:16px;">
   <div class="profile-avatar"><%= translator.name.charAt(0).toUpperCase() %></div>
@@ -14,61 +14,61 @@
   <div class="profile-stats">
     <div class="stat-item">
       <div class="stat-value"><%= translator.languages %></div>
-      <div class="stat-label">Languages</div>
+      <div class="stat-label"><%= t.translator_detail.languages %></div>
     </div>
     <div class="stat-item">
       <div class="stat-value"><%= translator.experience_years %></div>
-      <div class="stat-label">Years Experience</div>
+      <div class="stat-label"><%= t.translator_detail.years_experience %></div>
     </div>
     <div class="stat-item">
       <div class="stat-value">$<%= translator.hourly_rate %></div>
-      <div class="stat-label">Hourly Rate</div>
+      <div class="stat-label"><%= t.translator_detail.hourly_rate %></div>
     </div>
     <div class="stat-item">
       <div class="stat-value rating">&#11088; <%= avg_rating %></div>
-      <div class="stat-label"><%= review_count %> Reviews</div>
+      <div class="stat-label"><%= review_count %> <%= t.translator_detail.reviews_label %></div>
     </div>
   </div>
   <% if (translator.bio) { %>
     <div class="profile-bio">
-      <strong>About</strong>
+      <strong><%= t.translator_detail.about %></strong>
       <p style="margin-top:8px;"><%= translator.bio %></p>
     </div>
   <% } %>
 </div>
 
-<h2>Reviews</h2>
+<h2><%= t.translator_detail.reviews_title %></h2>
 
 <% if (typeof user !== 'undefined' && user.userRole === 'client') { %>
   <div class="review-form">
-    <h3>Leave a Review</h3>
+    <h3><%= t.translator_detail.leave_review %></h3>
     <form method="POST" action="/reviews">
       <input type="hidden" name="_csrf" value="<%= generateCsrfToken() %>">
       <input type="hidden" name="translator_id" value="<%= translator.id %>">
       <div class="form-group">
-        <label for="rating">Rating</label>
+        <label for="rating"><%= t.translator_detail.rating %></label>
         <select id="rating" name="rating" required>
-          <option value="5">&#11088; 5 — Excellent</option>
-          <option value="4">&#11088; 4 — Good</option>
-          <option value="3">&#11088; 3 — Average</option>
-          <option value="2">&#11088; 2 — Below Average</option>
-          <option value="1">&#11088; 1 — Poor</option>
+          <option value="5">&#11088; <%= t.translator_detail.rating_5 %></option>
+          <option value="4">&#11088; <%= t.translator_detail.rating_4 %></option>
+          <option value="3">&#11088; <%= t.translator_detail.rating_3 %></option>
+          <option value="2">&#11088; <%= t.translator_detail.rating_2 %></option>
+          <option value="1">&#11088; <%= t.translator_detail.rating_1 %></option>
         </select>
       </div>
       <div class="form-group">
-        <label for="comment">Comment</label>
-        <textarea id="comment" name="comment" rows="4" placeholder="Share your experience…"></textarea>
+        <label for="comment"><%= t.translator_detail.comment %></label>
+        <textarea id="comment" name="comment" rows="4" placeholder="<%= t.translator_detail.comment_placeholder %>"></textarea>
       </div>
-      <button type="submit" class="btn">Submit Review</button>
+      <button type="submit" class="btn"><%= t.translator_detail.submit_review %></button>
     </form>
   </div>
 <% } else if (typeof user === 'undefined' || !user.userId) { %>
-  <p style="margin-bottom:16px;"><a href="/auth/login">Sign in as a client</a> to leave a review.</p>
+  <p style="margin-bottom:16px;"><a href="/auth/login"><%= t.translator_detail.sign_in_to_review %></a> <%= t.translator_detail.to_leave_review %></p>
 <% } %>
 
 <% if (reviews.length === 0) { %>
   <div class="empty-state">
-    <p>No reviews yet.</p>
+    <p><%= t.translator_detail.no_reviews %></p>
   </div>
 <% } else { %>
   <div class="reviews-list">
