@@ -78,7 +78,9 @@
     "preferred_languages": "Ngôn ngữ ưa thích",
     "preferred_languages_placeholder": "ví dụ: Tiếng Việt, Tiếng Séc",
     "notes": "Ghi chú",
-    "notes_placeholder": "Bất kỳ thông tin hoặc sở thích bổ sung nào…"
+    "notes_placeholder": "Bất kỳ thông tin hoặc sở thích bổ sung nào…",
+    "my_reviews_title": "Đánh giá của tôi",
+    "no_reviews_yet": "Bạn chưa viết đánh giá nào."
   },
   "translators": {
     "catalog_title": "Danh mục phiên dịch",

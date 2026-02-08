@@ -123,7 +123,16 @@ router.get("/profile", requireLogin, (req, res) => {
     notes: clientProfile.notes || "",
   };
 
-  res.render("client-profile", { profile, error: null, success: null, user: req.session });
+  const reviews = req.app.locals.db.prepare(`
+    SELECT r.rating, r.comment, r.created_at, u.name as translator_name, tp.id as translator_id
+    FROM reviews r
+    JOIN translator_profiles tp ON r.translator_id = tp.id
+    JOIN users u ON tp.user_id = u.id
+    WHERE r.client_id = ?
+    ORDER BY r.created_at DESC
+  `).all(req.session.userId);
+
+  res.render("client-profile", { profile, reviews, error: null, success: null, user: req.session });
 });
 
 router.post("/profile", requireLogin, (req, res) => {
@@ -158,15 +167,24 @@ router.post("/profile", requireLogin, (req, res) => {
   // Client profile update
   const { name, email, phone, company, preferred_languages, notes } = req.body;
 
+  const clientReviews = req.app.locals.db.prepare(`
+    SELECT r.rating, r.comment, r.created_at, u.name as translator_name, tp.id as translator_id
+    FROM reviews r
+    JOIN translator_profiles tp ON r.translator_id = tp.id
+    JOIN users u ON tp.user_id = u.id
+    WHERE r.client_id = ?
+    ORDER BY r.created_at DESC
+  `).all(req.session.userId);
+
   if (!name || !email) {
     const profile = { name: name || "", email: email || "", phone: phone || "", company: company || "", preferred_languages: preferred_languages || "", notes: notes || "" };
-    return res.status(400).render("client-profile", { profile, error: res.locals.t.profile.required_fields_client, success: null, user: req.session });
+    return res.status(400).render("client-profile", { profile, reviews: clientReviews, error: res.locals.t.profile.required_fields_client, success: null, user: req.session });
   }
 
   const existing = req.app.locals.db.prepare("SELECT id FROM users WHERE email = ? AND id != ?").get(email, req.session.userId);
   if (existing) {
     const profile = { name, email, phone: phone || "", company: company || "", preferred_languages: preferred_languages || "", notes: notes || "" };
-    return res.status(400).render("client-profile", { profile, error: res.locals.t.profile.email_in_use, success: null, user: req.session });
+    return res.status(400).render("client-profile", { profile, reviews: clientReviews, error: res.locals.t.profile.email_in_use, success: null, user: req.session });
   }
 
   req.app.locals.db.prepare("UPDATE users SET name = ?, email = ? WHERE id = ?").run(name, email, req.session.userId);
@@ -185,7 +203,7 @@ router.post("/profile", requireLogin, (req, res) => {
   req.session.userEmail = email;
 
   const profile = { name, email, phone: phone || "", company: company || "", preferred_languages: preferred_languages || "", notes: notes || "" };
-  res.render("client-profile", { profile, error: null, success: res.locals.t.profile.profile_updated, user: req.session });
+  res.render("client-profile", { profile, reviews: clientReviews, error: null, success: res.locals.t.profile.profile_updated, user: req.session });
 });
 
 module.exports = router;

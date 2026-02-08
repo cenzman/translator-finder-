@@ -50,4 +50,29 @@
   <p class="form-footer" style="margin-top:20px;"><a href="/"><%= t.profile.back_to_home %></a></p>
 </div>
 
+<div class="form-card" style="max-width:560px; margin-top:24px;">
+  <h2><%= t.profile.my_reviews_title %></h2>
+
+  <% if (typeof reviews !== 'undefined' && reviews.length > 0) { %>
+    <div class="reviews-list">
+      <% reviews.forEach(function(r) { %>
+        <div class="review-card">
+          <div class="review-header">
+            <span class="review-author"><a href="/translators/<%= r.translator_id %>"><%= r.translator_name %></a></span>
+            <span class="review-rating">&#11088; <%= r.rating %>/5</span>
+          </div>
+          <% if (r.comment) { %>
+            <p class="review-comment"><%= r.comment %></p>
+          <% } %>
+          <p class="review-date"><%= r.created_at %></p>
+        </div>
+      <% }); %>
+    </div>
+  <% } else { %>
+    <div class="empty-state">
+      <p><%= t.profile.no_reviews_yet %></p>
+    </div>
+  <% } %>
+</div>
+
 <%- include('partials/footer') %>

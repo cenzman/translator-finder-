@@ -78,7 +78,9 @@
     "preferred_languages": "Preferované jazyky",
     "preferred_languages_placeholder": "např. vietnamština, čeština",
     "notes": "Poznámky",
-    "notes_placeholder": "Jakékoliv další informace nebo preference…"
+    "notes_placeholder": "Jakékoliv další informace nebo preference…",
+    "my_reviews_title": "Moje recenze",
+    "no_reviews_yet": "Zatím jste nenapsali žádné recenze."
   },
   "translators": {
     "catalog_title": "Katalog překladatelů",

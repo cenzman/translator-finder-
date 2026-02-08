@@ -78,7 +78,9 @@
     "preferred_languages": "Preferred Languages",
     "preferred_languages_placeholder": "e.g. Vietnamese, Czech",
     "notes": "Notes",
-    "notes_placeholder": "Any additional information or preferences…"
+    "notes_placeholder": "Any additional information or preferences…",
+    "my_reviews_title": "My Reviews",
+    "no_reviews_yet": "You haven't written any reviews yet."
   },
   "translators": {
     "catalog_title": "Translator Catalog",

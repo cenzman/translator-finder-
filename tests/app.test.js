@@ -443,6 +443,60 @@ describe("Client Profile Routes", () => {
     expect(res.status).toBe(400);
     expect(res.text).toContain("required");
   });
+
+  test("GET /auth/profile shows empty reviews section for client with no reviews", async () => {
+    const agent = request.agent(app);
+    const { token } = await getCsrf(agent, "/auth/register");
+    await agent
+      .post("/auth/register")
+      .type("form")
+      .send({ _csrf: token, email: "noreview@test.com", password: "pass123", name: "No Review Client", role: "client" });
+
+    const res = await agent.get("/auth/profile");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("My Reviews");
+    expect(res.text).toContain("You haven&#39;t written any reviews yet.");
+  });
+
+  test("GET /auth/profile shows client reviews on translators", async () => {
+    // Create translator
+    const transAgent = request.agent(app);
+    const { token: transToken } = await getCsrf(transAgent, "/auth/register");
+    await transAgent
+      .post("/auth/register")
+      .type("form")
+      .send({
+        _csrf: transToken,
+        email: "reviewtrans@test.com",
+        password: "pass123",
+        name: "Reviewed Translator",
+        role: "translator",
+        languages: "Vietnamese, Czech",
+      });
+
+    // Create client
+    const agent = request.agent(app);
+    const { token: clientToken } = await getCsrf(agent, "/auth/register");
+    await agent
+      .post("/auth/register")
+      .type("form")
+      .send({ _csrf: clientToken, email: "reviewer@test.com", password: "pass123", name: "Reviewer Client", role: "client" });
+
+    // Post a review
+    const { token: reviewToken } = await getCsrf(agent, "/translators/1");
+    await agent
+      .post("/reviews")
+      .type("form")
+      .send({ _csrf: reviewToken, translator_id: "1", rating: "4", comment: "Great translation work!" });
+
+    // Check client profile shows the review
+    const res = await agent.get("/auth/profile");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("My Reviews");
+    expect(res.text).toContain("Reviewed Translator");
+    expect(res.text).toContain("Great translation work!");
+    expect(res.text).toContain("4/5");
+  });
 });
 
 describe("Internationalization", () => {
