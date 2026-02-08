@@ -1,8 +1,8 @@
 <%- include('partials/header') %>
 
 <div class="form-card">
-  <h1>Create Account</h1>
-  <p class="form-subtitle">Join as a client or translator</p>
+  <h1><%= t.register.title %></h1>
+  <p class="form-subtitle"><%= t.register.subtitle %></p>
 
   <% if (error) { %>
     <p class="error"><%= error %></p>
@@ -11,51 +11,51 @@
   <form method="POST" action="/auth/register">
     <input type="hidden" name="_csrf" value="<%= generateCsrfToken() %>">
     <div class="form-group">
-      <label for="name">Full Name</label>
+      <label for="name"><%= t.register.full_name %></label>
       <input type="text" id="name" name="name" placeholder="John Doe" required>
     </div>
 
     <div class="form-group">
-      <label for="email">Email</label>
+      <label for="email"><%= t.register.email %></label>
       <input type="email" id="email" name="email" placeholder="you@example.com" required>
     </div>
 
     <div class="form-group">
-      <label for="password">Password</label>
+      <label for="password"><%= t.register.password %></label>
       <input type="password" id="password" name="password" placeholder="••••••••" required>
     </div>
 
     <div class="form-group">
-      <label for="role">I am a</label>
+      <label for="role"><%= t.register.i_am_a %></label>
       <select id="role" name="role" required>
-        <option value="client">Client — I need translations</option>
-        <option value="translator">Translator — I offer translations</option>
+        <option value="client"><%= t.register.client_option %></option>
+        <option value="translator"><%= t.register.translator_option %></option>
       </select>
     </div>
 
     <div id="translator-fields" style="display:none;">
       <div class="form-group">
-        <label for="languages">Languages</label>
+        <label for="languages"><%= t.register.languages %></label>
         <input type="text" id="languages" name="languages" value="Vietnamese, Czech">
       </div>
       <div class="form-group">
-        <label for="bio">Bio</label>
-        <textarea id="bio" name="bio" rows="4" placeholder="Tell clients about your experience…"></textarea>
+        <label for="bio"><%= t.register.bio %></label>
+        <textarea id="bio" name="bio" rows="4" placeholder="<%= t.register.bio_placeholder %>"></textarea>
       </div>
       <div class="form-group">
-        <label for="experience_years">Years of Experience</label>
+        <label for="experience_years"><%= t.register.years_experience %></label>
         <input type="number" id="experience_years" name="experience_years" min="0" value="0">
       </div>
       <div class="form-group">
-        <label for="hourly_rate">Hourly Rate ($)</label>
+        <label for="hourly_rate"><%= t.register.hourly_rate %></label>
         <input type="number" id="hourly_rate" name="hourly_rate" min="0" step="0.01" value="0">
       </div>
     </div>
 
-    <button type="submit" class="btn" style="width:100%;">Create Account</button>
+    <button type="submit" class="btn" style="width:100%;"><%= t.register.create_account %></button>
   </form>
 
-  <p class="form-footer">Already have an account? <a href="/auth/login">Sign in</a></p>
+  <p class="form-footer"><%= t.register.already_have_account %> <a href="/auth/login"><%= t.register.sign_in %></a></p>
 </div>
 
 <script src="/js/register.js"></script>

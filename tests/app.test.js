@@ -266,7 +266,7 @@ describe("Profile Edit Routes", () => {
     expect(res.headers.location).toBe("/auth/login");
   });
 
-  test("GET /auth/profile returns 403 for clients", async () => {
+  test("GET /auth/profile returns 200 for clients", async () => {
     const agent = request.agent(app);
     const { token } = await getCsrf(agent, "/auth/register");
     await agent
@@ -275,7 +275,8 @@ describe("Profile Edit Routes", () => {
       .send({ _csrf: token, email: "client@test.com", password: "pass123", name: "Client", role: "client" });
 
     const res = await agent.get("/auth/profile");
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("Client");
   });
 
   test("GET /auth/profile returns 200 for translators", async () => {
@@ -371,5 +372,103 @@ describe("Profile Edit Routes", () => {
 
     expect(res.status).toBe(400);
     expect(res.text).toContain("required");
+  });
+});
+
+describe("Client Profile Routes", () => {
+  test("GET /auth/profile returns client profile form", async () => {
+    const agent = request.agent(app);
+    const { token } = await getCsrf(agent, "/auth/register");
+    await agent
+      .post("/auth/register")
+      .type("form")
+      .send({ _csrf: token, email: "clientprofile@test.com", password: "pass123", name: "Client User", role: "client" });
+
+    const res = await agent.get("/auth/profile");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("Client User");
+    expect(res.text).toContain("clientprofile@test.com");
+  });
+
+  test("POST /auth/profile updates client info", async () => {
+    const agent = request.agent(app);
+    const { token: regToken } = await getCsrf(agent, "/auth/register");
+    await agent
+      .post("/auth/register")
+      .type("form")
+      .send({ _csrf: regToken, email: "clientedit@test.com", password: "pass123", name: "Old Client", role: "client" });
+
+    const { token: profileToken } = await getCsrf(agent, "/auth/profile");
+    const res = await agent
+      .post("/auth/profile")
+      .type("form")
+      .send({
+        _csrf: profileToken,
+        name: "New Client",
+        email: "clientedit@test.com",
+        phone: "123-456-7890",
+        company: "Test Corp",
+        preferred_languages: "Vietnamese, Czech",
+        notes: "Some notes here",
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("New Client");
+    expect(res.text).toContain("Test Corp");
+
+    const clientProfile = app.locals.db.prepare("SELECT * FROM client_profiles WHERE user_id = 1").get();
+    expect(clientProfile).toBeDefined();
+    expect(clientProfile.phone).toBe("123-456-7890");
+    expect(clientProfile.company).toBe("Test Corp");
+  });
+
+  test("POST /auth/profile rejects missing required client fields", async () => {
+    const agent = request.agent(app);
+    const { token: regToken } = await getCsrf(agent, "/auth/register");
+    await agent
+      .post("/auth/register")
+      .type("form")
+      .send({ _csrf: regToken, email: "clientval@test.com", password: "pass123", name: "Validator", role: "client" });
+
+    const { token: profileToken } = await getCsrf(agent, "/auth/profile");
+    const res = await agent
+      .post("/auth/profile")
+      .type("form")
+      .send({
+        _csrf: profileToken,
+        name: "",
+        email: "clientval@test.com",
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.text).toContain("required");
+  });
+});
+
+describe("Internationalization", () => {
+  test("GET / defaults to English", async () => {
+    const res = await request(app).get("/");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("Find Your Perfect Translator");
+  });
+
+  test("GET /?lang=cs returns Czech UI", async () => {
+    const res = await request(app).get("/?lang=cs");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("Najděte svého ideálního překladatele");
+  });
+
+  test("GET /?lang=vi returns Vietnamese UI", async () => {
+    const res = await request(app).get("/?lang=vi");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("Tìm phiên dịch hoàn hảo của bạn");
+  });
+
+  test("Language switcher links are present", async () => {
+    const res = await request(app).get("/");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("?lang=en");
+    expect(res.text).toContain("?lang=cs");
+    expect(res.text).toContain("?lang=vi");
   });
 });

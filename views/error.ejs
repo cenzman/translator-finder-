@@ -1,9 +1,9 @@
 <%- include('partials/header') %>
 
 <div class="form-card" style="text-align:center;">
-  <h1>Oops!</h1>
+  <h1><%= t.error.oops %></h1>
   <p class="error"><%= message %></p>
-  <a href="/" class="btn btn-secondary">&larr; Back to Home</a>
+  <a href="/" class="btn btn-secondary">&larr; <%= t.error.back_to_home %></a>
 </div>
 
 <%- include('partials/footer') %>

@@ -660,3 +660,33 @@ footer {
   .navbar-links a,
   .navbar-links span { padding: 6px 10px; font-size: 13px; }
 }
+
+/* ===== Language Switcher ===== */
+.lang-switcher {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.lang-link {
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: var(--text-muted) !important;
+  text-decoration: none !important;
+  border-radius: 0 !important;
+  transition: background var(--transition), color var(--transition);
+}
+
+.lang-link:hover {
+  background: var(--primary-light) !important;
+  color: var(--primary) !important;
+}
+
+.lang-link.active {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
